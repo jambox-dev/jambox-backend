@@ -1,9 +1,63 @@
 package org.jambox.backend.controller;
 
+import lombok.RequiredArgsConstructor;
+import org.jambox.backend.model.entity.Song;
+import org.jambox.backend.model.SpotifySearch.ArtistX;
+import org.jambox.backend.model.SpotifySearch.SpotifySearchResponse;
+import org.jambox.backend.model.SpotifySearch.SpotifySearchResponseItem;
+import org.jambox.backend.model.SpotifySearch.Tracks;
+import org.jambox.backend.service.SongService;
+import org.jambox.backend.service.SpotifyService;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
-@RequestMapping("/song")
+@RequestMapping("/songs")
+@RequiredArgsConstructor
 public class SongController {
+    private final SpotifyService spotifyService;
+    private final SongService songService;
+
+    @GetMapping("/search")
+    public Song[] getSongs(@RequestParam(name = "song_name") String songName) {
+        ArrayList<Song> songs = new ArrayList<>();
+        Tracks tracks = spotifyService.searchTrack(songName).map(SpotifySearchResponse::getTracks).block();
+
+        assert tracks != null;
+        List<SpotifySearchResponseItem> items = tracks.getItems();
+
+        for (int i = 0; i < items.toArray().length; i++) {
+            Song song = new Song();
+            song.setSongName(items.get(i).getName());
+            song.setSongUrl(items.get(i).getHref());
+            song.setSongCover(items.get(i).getAlbum().getImages().getFirst().getUrl());
+            String artists = toCommaSeparatedString(items.get(i).getArtists().stream().map(ArtistX::getName).toList());
+            song.setAuthor(artists);
+            songs.add(song);
+        }
+
+        songService.addSongs(songs);
+        return songs.toArray(Song[]::new);
+    }
+
+    public String toCommaSeparatedString(List<String> artists) {
+        StringBuilder result = new StringBuilder();
+
+        artists.forEach(item -> {
+            if (!item.isBlank()){
+                if (!result.isEmpty()) {
+                    result.append(", ");
+                }
+                result.append(item);
+            }
+        });
+
+        return result.toString();
+    }
+
 }
