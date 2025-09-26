@@ -49,4 +49,11 @@ public class SpotifyController {
         return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
     }
 
+    @GetMapping("/loggedin")
+    public ResponseEntity<Object> loggedIn() {
+        if (spotifyAuthService.getAccessToken() == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
