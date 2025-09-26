@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.jambox.backend.model.ApproveRequest;
 import org.jambox.backend.model.QueueAddRequest;
 import org.jambox.backend.model.entity.ApprovalQueue;
+import org.jambox.backend.model.entity.Settings;
 import org.jambox.backend.model.entity.Song;
 import org.jambox.backend.repository.ApprovalQueueRepository;
 import org.jambox.backend.service.ApprovalQueueService;
 import org.jambox.backend.service.QueueService;
+import org.jambox.backend.service.SettingsService;
 import org.jambox.backend.service.SongService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ public class QueueController {
     private final QueueService queueService;
     private final SongService songService;
     private final ApprovalQueueRepository approvalQueueRepository;
+    private final SettingsService settingsService;
 
     @Value("${jambox.needsApproval}")
     private boolean needsApproval;
@@ -34,6 +37,13 @@ public class QueueController {
             queueService.addSongToQueue(song);
         }
         return ResponseEntity.status(201).build();
+    }
+
+    @PostMapping
+    public void setNeedsApproval(@RequestParam(name = "needs-approval") boolean needsApproval) {
+        Settings settings = settingsService.getSettings();
+        settings.setNeedsApproval(needsApproval);
+        settingsService.updateSettings(settings);
     }
 
     @GetMapping()
