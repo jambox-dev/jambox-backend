@@ -1,0 +1,21 @@
+spring:
+    application:
+        name: jambox-backend
+    data:
+        mongodb:
+            port: 27017     # Standard MongoDB Port
+            database: jambox # Ihr Datenbankname
+            # Für URI-basierte Verbindung:
+            uri: mongodb://
+            password:
+            username:
+            authentication-database:
+
+jambox:
+    needsApproval: false
+    #removeDupplicate: false
+    #blacklist: false
+    #whitelist: false
+    spotify:
+        client-id:
+        client-secret:
