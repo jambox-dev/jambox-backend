@@ -36,7 +36,7 @@ public class SongController {
             song.setSongName(items.get(i).getName());
             song.setSongUrl(items.get(i).getHref());
             song.setSongCover(items.get(i).getAlbum().getImages().getFirst().getUrl());
-            String artists = toCommaSeparatedString(items.get(i).getArtists().stream().map(ArtistX::getName).toList());
+            String artists = songService.toCommaSeparatedString(items.get(i).getArtists().stream().map(ArtistX::getName).toList());
             song.setAuthor(artists);
             songs.add(song);
         }
@@ -45,19 +45,6 @@ public class SongController {
         return songs.toArray(Song[]::new);
     }
 
-    public String toCommaSeparatedString(List<String> artists) {
-        StringBuilder result = new StringBuilder();
 
-        artists.forEach(item -> {
-            if (!item.isBlank()){
-                if (!result.isEmpty()) {
-                    result.append(", ");
-                }
-                result.append(item);
-            }
-        });
-
-        return result.toString();
-    }
 
 }
