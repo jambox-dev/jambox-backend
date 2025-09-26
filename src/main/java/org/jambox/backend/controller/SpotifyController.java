@@ -1,7 +1,9 @@
 package org.jambox.backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.jambox.backend.model.SpotifyUserResponse;
 import org.jambox.backend.service.SpotifyAuthService;
+import org.jambox.backend.service.SpotifyService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,19 +13,31 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/spotify")
 @RequiredArgsConstructor
 public class SpotifyController {
     private final SpotifyAuthService spotifyAuthService;
+    private final SpotifyService spotifyService;
 
     @Value("${jambox.spotify.client-id}")
     private String clientId;
 
+    @Value("${jambox.spotify.email-address}")
+    private String spotifyEmailAddress;
+
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code") String code) {
         spotifyAuthService.setToken(spotifyAuthService.getAccessToken(code, spotifyAuthService.getVerifier()));
+        SpotifyUserResponse user = spotifyService.getUserDetails().block();
+        if (user == null) {
+            throw new IllegalStateException("User details could not be retrieved");
+        }
+        if (!Objects.equals(user.getEmail(), spotifyEmailAddress)) {
+            return "error: not Allowed to Perform this action";
+        }
         return "success";
     }
 

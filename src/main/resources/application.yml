@@ -19,3 +19,4 @@ jambox:
     spotify:
         client-id:
         client-secret:
+        email-address:

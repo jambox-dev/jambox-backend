@@ -2,6 +2,7 @@ package org.jambox.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.jambox.backend.model.SpotifySearch.SpotifySearchResponse;
+import org.jambox.backend.model.SpotifyUserResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -14,6 +15,17 @@ import java.net.URISyntaxException;
 public class SpotifyService {
     private final WebClient spotifyWebClient;
     private final SpotifyAuthService spotifyAuthService;
+
+    public Mono<SpotifyUserResponse> getUserDetails() {
+        return spotifyWebClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/me")
+                        .build())
+                .header("Authorization", "Bearer " + spotifyAuthService.getAccessToken())
+                .retrieve()
+                .bodyToMono(SpotifyUserResponse.class);
+    }
+
 
     public Mono<SpotifySearchResponse> searchTrack(String query) {
         return spotifyWebClient.get()
