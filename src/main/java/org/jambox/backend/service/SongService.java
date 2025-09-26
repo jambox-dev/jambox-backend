@@ -15,8 +15,10 @@ public class SongService {
     private final SpotifyService spotifyService;
 
     public Song getDetailsByUrl(String songUrl) {
-        Song song = songRepository.findBySongUrl(songUrl).orElse(null);
-        if (song == null) {
+        List<Song> songs = songRepository.findBySongUrl(songUrl).orElse(null);
+        Song song = null;
+
+        if (songs == null) {
             TrackResponseModel trackDetails = spotifyService.getTrackDetailsFromUri(songUrl).block();
             song = new Song();
             if (trackDetails == null || trackDetails.getName() == null) {
@@ -28,6 +30,8 @@ public class SongService {
             String artists = toCommaSeparatedString(trackDetails.getArtists().stream().map(TrackResponseModel.ArtistInfo::getName).toList());
             song.setAuthor(artists);
             songRepository.save(song);
+        } else {
+            song = songs.getFirst();
         }
         return song;
     }
