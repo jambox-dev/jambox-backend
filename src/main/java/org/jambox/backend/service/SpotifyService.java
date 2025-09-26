@@ -3,6 +3,7 @@ package org.jambox.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.jambox.backend.model.SpotifySearch.SpotifySearchResponse;
 import org.jambox.backend.model.SpotifyUserResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -41,15 +42,15 @@ public class SpotifyService {
                 .bodyToMono(SpotifySearchResponse.class);
     }
 
-    public Mono<SpotifySearchResponse> addToUserQueue(String trackUri) {
+    public Mono<ResponseEntity<Void>> addToUserQueue(String trackUri) {
         return spotifyWebClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/me/player/queue")
-                        .queryParam("uri", "spotify%3Atrack%3A" + extractTrackId(trackUri))
+                        .queryParam("uri", "spotify:track:" + extractTrackId(trackUri))
                         .build())
                 .header("Authorization", "Bearer " + spotifyAuthService.getAccessToken())
                 .retrieve()
-                .bodyToMono(SpotifySearchResponse.class);
+                .toBodilessEntity();
     }
 
     public static String extractTrackId(String spotifyUrl) {
