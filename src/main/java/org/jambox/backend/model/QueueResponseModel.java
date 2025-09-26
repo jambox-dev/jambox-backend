@@ -1,5 +1,6 @@
 package org.jambox.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QueueResponseModel {
+    @JsonProperty("currently_playing")
     private TrackResponseModel currentlyPlaying;
     private List<TrackResponseModel> queue;
 }
