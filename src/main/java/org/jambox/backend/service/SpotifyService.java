@@ -1,6 +1,7 @@
 package org.jambox.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jambox.backend.model.QueueResponseModel;
 import org.jambox.backend.model.SpotifySearch.SpotifySearchResponse;
 import org.jambox.backend.model.SpotifyUserResponse;
 import org.jambox.backend.model.TrackResponseModel;
@@ -62,6 +63,16 @@ public class SpotifyService {
                 .header("Authorization", "Bearer " + spotifyAuthService.getAccessToken())
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    public Mono<QueueResponseModel> getUserQueue() {
+        return spotifyWebClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/me/player/queue")
+                        .build())
+                .header("Authorization", "Bearer " + spotifyAuthService.getAccessToken())
+                .retrieve()
+                .bodyToMono(QueueResponseModel.class);
     }
 
     public static String extractTrackId(String spotifyUrl) {

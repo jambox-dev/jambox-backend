@@ -1,7 +1,11 @@
 package org.jambox.backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.jambox.backend.mapper.QueueMapper;
+import org.jambox.backend.model.QueueResponseModel;
 import org.jambox.backend.model.SpotifyUserResponse;
+import org.jambox.backend.model.TrackResponseModel;
+import org.jambox.backend.model.entity.Song;
 import org.jambox.backend.service.SpotifyAuthService;
 import org.jambox.backend.service.SpotifyService;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.sound.midi.Track;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -21,6 +27,7 @@ import java.util.Objects;
 public class SpotifyController {
     private final SpotifyAuthService spotifyAuthService;
     private final SpotifyService spotifyService;
+    private final QueueMapper queueMapper;
 
     @Value("${jambox.spotify.client-id}")
     private String clientId;
@@ -55,5 +62,14 @@ public class SpotifyController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/queue")
+    public Song[] getQueue(){
+        QueueResponseModel queue = spotifyService.getUserQueue().block();
+        if (queue == null) {
+            return new Song[0];
+        }
+        return queueMapper.toSongList(queue).toArray(Song[]::new);
     }
 }

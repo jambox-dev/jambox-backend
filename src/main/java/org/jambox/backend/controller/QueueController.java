@@ -7,6 +7,7 @@ import org.jambox.backend.model.entity.ApprovalQueue;
 import org.jambox.backend.model.entity.Settings;
 import org.jambox.backend.model.entity.Song;
 import org.jambox.backend.repository.ApprovalQueueRepository;
+import org.jambox.backend.repository.SettingsRepository;
 import org.jambox.backend.service.ApprovalQueueService;
 import org.jambox.backend.service.QueueService;
 import org.jambox.backend.service.SettingsService;
@@ -24,14 +25,12 @@ public class QueueController {
     private final SongService songService;
     private final ApprovalQueueRepository approvalQueueRepository;
     private final SettingsService settingsService;
-
-    @Value("${jambox.needsApproval}")
-    private boolean needsApproval;
+    private final SettingsRepository settingsRepository;
 
     @PostMapping
     public ResponseEntity<Song> addToQueue(@RequestBody QueueAddRequest queueAddRequest) {
         Song song = songService.getDetailsByUrl(queueAddRequest.getSongUrl());
-        if (needsApproval) {
+        if (settingsRepository.getSettings().isNeedsApproval()) {
             approvalQueueService.addSongToApprovalQueue(song);
         } else {
             queueService.addSongToQueue(song);
@@ -39,7 +38,7 @@ public class QueueController {
         return ResponseEntity.status(201).build();
     }
 
-    @PostMapping
+    @PostMapping("/settings")
     public void setNeedsApproval(@RequestParam(name = "needs-approval") boolean needsApproval) {
         Settings settings = settingsService.getSettings();
         settings.setNeedsApproval(needsApproval);

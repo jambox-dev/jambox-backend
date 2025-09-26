@@ -22,7 +22,7 @@ import java.util.Base64;
 @Service
 @RequiredArgsConstructor
 public class SpotifyAuthService {
-    public static final String SCOPES = "user-read-private user-read-email user-modify-playback-state";
+    public static final String SCOPES = "user-read-private user-read-email user-modify-playback-state user-read-currently-playing user-read-playback-state";
 
     @Value( "${jambox.spotify.client-id}")
     private String clientId;
