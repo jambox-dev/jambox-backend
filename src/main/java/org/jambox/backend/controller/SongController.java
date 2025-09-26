@@ -23,7 +23,7 @@ public class SongController {
     private final SpotifyService spotifyService;
     private final SongService songService;
 
-    @GetMapping("/search")
+    @GetMapping()
     public Song[] getSongs(@RequestParam(name = "song_name") String songName) {
         ArrayList<Song> songs = new ArrayList<>();
         Tracks tracks = spotifyService.searchTrack(songName).map(SpotifySearchResponse::getTracks).block();

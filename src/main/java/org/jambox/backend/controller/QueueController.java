@@ -46,14 +46,14 @@ public class QueueController {
         return approvalQueueService.getQueue().toArray(ApprovalQueue[]::new);
     }
 
-    @GetMapping("/search")
-    public Song[] searchQueue(@RequestParam String search) {
-        return queueService.getSongs(search).toArray(Song[]::new);
+    @GetMapping()
+    public Song[] searchQueue(@RequestParam(name = "song_name") String songName) {
+        return queueService.getSongs(songName).toArray(Song[]::new);
     }
 
-    @GetMapping("/needs-approval/search")
-    public ApprovalQueue[] searchQueueNeedsApproval(@RequestParam String search) {
-        return approvalQueueService.searchQueueNeedsApproval(search).toArray(ApprovalQueue[]::new);
+    @GetMapping("/needs-approval")
+    public ApprovalQueue[] searchQueueNeedsApproval(@RequestParam(name = "song_name") String songName) {
+        return approvalQueueService.searchQueueNeedsApproval(songName).toArray(ApprovalQueue[]::new);
     }
 
     @PostMapping("/approve")

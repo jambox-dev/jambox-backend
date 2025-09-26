@@ -14,7 +14,7 @@ public class CompletionController {
     final SpotifyService spotifyService;
 
     @GetMapping
-    public Mono<String[]> getCompletion(@RequestParam String search) {
+    public Mono<String[]> getCompletion(@RequestParam(name = "search") String search) {
         return spotifyService.searchTrack(search)
                 .map(response -> response.getTracks().getItems().stream()
                         .map(SpotifySearchResponseItem::getName)
