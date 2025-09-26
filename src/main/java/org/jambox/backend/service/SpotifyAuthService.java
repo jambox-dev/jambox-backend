@@ -96,6 +96,24 @@ public class SpotifyAuthService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
+        return getSpotifyToken(request);
+    }
+
+    public SpotifyToken getRefreshToken() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("client_id", clientId);
+        params.add("grant_type", "refresh_token");
+        params.add("refresh_token", token.getRefreshToken());
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+
+        return getSpotifyToken(request);
+    }
+
+    private SpotifyToken getSpotifyToken(HttpEntity<MultiValueMap<String, String>> request) {
         ResponseEntity<SpotifyTokenResponse> response = restTemplate.exchange(
                 "https://accounts.spotify.com/api/token",
                 HttpMethod.POST,
@@ -104,53 +122,22 @@ public class SpotifyAuthService {
         );
 
         if (response.getBody() != null) {
-            return new SpotifyToken(response.getBody().getAccess_token(), response.getBody().getRefresh_token(), Math.toIntExact(response.getBody().getExpires_in()));
+            if (response.getBody().getRefresh_token().isBlank() || response.getBody().getRefresh_token().isEmpty()) {
+                return new SpotifyToken(response.getBody().getAccess_token(), token.getRefreshToken(), Math.toIntExact(response.getBody().getExpires_in()));
+            } else {
+                return new SpotifyToken(response.getBody().getAccess_token(), response.getBody().getRefresh_token(), Math.toIntExact(response.getBody().getExpires_in()));
+            }
         }
         throw new RuntimeException("Token-Antwort ist null");
     }
-
 
     public String getAccessToken() {
         if (token == null) {
             throw new IllegalStateException("No Spotify Token available");
         }
         if (token.isExpired()) {
-            refreshToken();
+            getRefreshToken();
         }
         return token.getAccessToken();
-    }
-
-    private void refreshToken() {
-        String url = "https://accounts.spotify.com/api/token";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        String auth = clientId + ":" + clientSecret;
-        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
-        headers.set("Authorization", "Basic " + encodedAuth);
-
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", "refresh_token");
-        body.add("refresh_token", token.getRefreshToken());
-
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
-
-        ResponseEntity<LocalSpotifyToken> response = restTemplate.postForEntity(url, request, LocalSpotifyToken.class);
-
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            LocalSpotifyToken resp = response.getBody();
-            token.setAccessToken(resp.getAccess_token());
-            token.setExpiresAt(Instant.now().plusSeconds(resp.getExpires_in()));
-        } else {
-            throw new RuntimeException("Spotify token refresh failed");
-        }
-    }
-
-    // DTO für Spotify Token Response
-    @Getter
-    @Setter
-    static class LocalSpotifyToken {
-        private String access_token;
-        private int expires_in;
     }
 }
