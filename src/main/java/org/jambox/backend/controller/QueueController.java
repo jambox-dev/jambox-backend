@@ -45,6 +45,11 @@ public class QueueController {
         settingsService.updateSettings(settings);
     }
 
+    @GetMapping("/settings")
+    public Settings getNeedsApproval() {
+        return settingsService.getSettings();
+    }
+
     @GetMapping()
     public Song[] getQueue() {
         return queueService.getSongs().toArray(Song[]::new);
