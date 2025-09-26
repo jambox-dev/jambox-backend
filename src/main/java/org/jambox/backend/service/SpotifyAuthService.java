@@ -22,7 +22,6 @@ import java.util.Base64;
 @Service
 @RequiredArgsConstructor
 public class SpotifyAuthService {
-    public static final String CALLBACK = "http://127.0.0.1:8080/spotify/callback";
     public static final String SCOPES = "user-read-private user-read-email user-modify-playback-state";
 
     @Value( "${jambox.spotify.client-id}")
@@ -30,6 +29,9 @@ public class SpotifyAuthService {
 
     @Value( "${jambox.spotify.client-secret}")
     private String clientSecret;
+
+    @Value( "${jambox.spotify.callback-url}")
+    private String callbackUrl;
 
     @Setter
     private SpotifyToken token;
@@ -47,7 +49,7 @@ public class SpotifyAuthService {
         StringBuilder params = new StringBuilder();
         params.append("client_id=").append(clientId)
                 .append("&response_type=code")
-                .append("&redirect_uri=").append(java.net.URLEncoder.encode(CALLBACK, StandardCharsets.UTF_8))
+                .append("&redirect_uri=").append(java.net.URLEncoder.encode(callbackUrl, StandardCharsets.UTF_8))
                 .append("&scope=").append(java.net.URLEncoder.encode(SCOPES, StandardCharsets.UTF_8))
                 .append("&code_challenge_method=S256")
                 .append("&code_challenge=").append(challenge);
@@ -90,7 +92,7 @@ public class SpotifyAuthService {
         params.add("client_id", clientId);
         params.add("grant_type", "authorization_code");
         params.add("code", code);
-        params.add("redirect_uri", CALLBACK);
+        params.add("redirect_uri", callbackUrl);
         params.add("code_verifier", verifier);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);

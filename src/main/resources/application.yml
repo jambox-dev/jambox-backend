@@ -20,3 +20,4 @@ jambox:
         client-id:
         client-secret:
         email-address:
+        callback-url: "http://127.0.0.1:8080/spotify/callback" #Just Change the URL not the path
