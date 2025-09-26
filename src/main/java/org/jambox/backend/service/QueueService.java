@@ -36,12 +36,4 @@ public class QueueService {
     public List<Song> getSongs(String search) {
         return queueRepository.findAll().stream().map(Queue::getSong).filter(song -> song.getSongName().contains(search)).toList();
     }
-
-//    void addSong(Song song);
-//    void removeSong(Song song);
-//    List<Song> getSongs();
-//    void removeAllSongs();
-//    int getSize();
-//    boolean isEmpty();
-//    boolean contains(Song song);
 }

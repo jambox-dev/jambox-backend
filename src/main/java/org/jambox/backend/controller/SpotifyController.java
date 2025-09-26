@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.jambox.backend.mapper.QueueMapper;
 import org.jambox.backend.model.QueueResponseModel;
 import org.jambox.backend.model.SpotifyUserResponse;
-import org.jambox.backend.model.TrackResponseModel;
 import org.jambox.backend.model.entity.Song;
 import org.jambox.backend.service.SpotifyAuthService;
 import org.jambox.backend.service.SpotifyService;
@@ -15,10 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.sound.midi.Track;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Objects;
 
 @RestController

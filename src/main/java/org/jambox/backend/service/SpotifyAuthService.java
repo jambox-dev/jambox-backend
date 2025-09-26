@@ -46,18 +46,17 @@ public class SpotifyAuthService {
         verifier = generateCodeVerifier(128);
         String challenge = generateCodeChallenge(verifier);
 
-        StringBuilder params = new StringBuilder();
-        params.append("client_id=").append(clientId)
-                .append("&response_type=code")
-                .append("&redirect_uri=").append(java.net.URLEncoder.encode(callbackUrl, StandardCharsets.UTF_8))
-                .append("&scope=").append(java.net.URLEncoder.encode(SCOPES, StandardCharsets.UTF_8))
-                .append("&code_challenge_method=S256")
-                .append("&code_challenge=").append(challenge);
+        String params = "client_id=" + clientId +
+                "&response_type=code" +
+                "&redirect_uri=" + java.net.URLEncoder.encode(callbackUrl, StandardCharsets.UTF_8) +
+                "&scope=" + java.net.URLEncoder.encode(SCOPES, StandardCharsets.UTF_8) +
+                "&code_challenge_method=S256" +
+                "&code_challenge=" + challenge;
 
-        return "https://accounts.spotify.com/authorize?" + params.toString();
+        return "https://accounts.spotify.com/authorize?" + params;
     }
 
-    private String generateCodeVerifier(int length) {
+    private String generateCodeVerifier(@SuppressWarnings("SameParameterValue") int length) {
         String possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         SecureRandom secureRandom = new SecureRandom();
         StringBuilder text = new StringBuilder();

@@ -51,13 +51,4 @@ public class ApprovalQueueService {
         approvalQueue.setSong(song);
         approvalQueueRepository.save(approvalQueue);
     }
-
-
-//    void addSong(Song song);
-//    void removeSong(Song song);
-//    List<Song> getSongs();
-//    void removeAllSongs();
-//    int getSize();
-//    boolean isEmpty();
-//    boolean contains(Song song);
 }
