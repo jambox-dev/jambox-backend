@@ -23,7 +23,7 @@ public class SongService {
                 throw new IllegalArgumentException("TrackDetails not found");
             }
             song.setSongName(trackDetails.getName());
-            song.setSongUrl(trackDetails.getUri());
+            song.setSongUrl(trackDetails.getHref());
             song.setSongCover(trackDetails.getAlbum().getImages().getFirst().getUrl());
             String artists = toCommaSeparatedString(trackDetails.getArtists().stream().map(TrackResponseModel.ArtistInfo::getName).toList());
             song.setAuthor(artists);
@@ -40,7 +40,7 @@ public class SongService {
             throw new IllegalArgumentException("TrackDetails not found");
         }
         song.setSongName(trackDetails.getName());
-        song.setSongUrl(trackDetails.getUri());
+        song.setSongUrl(trackDetails.getHref());
         song.setSongCover(trackDetails.getAlbum().getImages().getFirst().getUrl());
         String artists = toCommaSeparatedString(trackDetails.getArtists().stream().map(TrackResponseModel.ArtistInfo::getName).toList());
         song.setAuthor(artists);
