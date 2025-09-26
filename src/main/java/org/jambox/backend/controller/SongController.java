@@ -25,6 +25,17 @@ public class SongController {
 
     @GetMapping()
     public Song[] getSongs(@RequestParam(name = "song_name") String songName) {
+        if (songName.contains("https://open.spotify.com/track")){
+            try {
+                String trackId = songName.substring(songName.indexOf("track/") + 6, songName.indexOf("?si"));
+                Song song = songService.getDetailsById(trackId);
+                return new Song[]{ song };
+            } catch (Exception e) {
+                return new Song[0];
+            }
+
+        }
+
         ArrayList<Song> songs = new ArrayList<>();
         Tracks tracks = spotifyService.searchTrack(songName).map(SpotifySearchResponse::getTracks).block();
 

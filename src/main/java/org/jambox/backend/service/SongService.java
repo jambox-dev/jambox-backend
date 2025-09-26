@@ -17,7 +17,7 @@ public class SongService {
     public Song getDetailsByUrl(String songUrl) {
         Song song = songRepository.findBySongUrl(songUrl).orElse(null);
         if (song == null) {
-            TrackResponseModel trackDetails = spotifyService.getTrackDetails(songUrl).block();
+            TrackResponseModel trackDetails = spotifyService.getTrackDetailsFromUri(songUrl).block();
             song = new Song();
             if (trackDetails == null || trackDetails.getName() == null) {
                 throw new IllegalArgumentException("TrackDetails not found");
@@ -32,6 +32,21 @@ public class SongService {
         return song;
     }
 
+    //todo: caching
+    public Song getDetailsById(String songId) {
+        TrackResponseModel trackDetails = spotifyService.getTrackDetailsFromId(songId).block();
+        Song song = new Song();
+        if (trackDetails == null || trackDetails.getName() == null) {
+            throw new IllegalArgumentException("TrackDetails not found");
+        }
+        song.setSongName(trackDetails.getName());
+        song.setSongUrl(trackDetails.getUri());
+        song.setSongCover(trackDetails.getAlbum().getImages().getFirst().getUrl());
+        String artists = toCommaSeparatedString(trackDetails.getArtists().stream().map(TrackResponseModel.ArtistInfo::getName).toList());
+        song.setAuthor(artists);
+        songRepository.save(song);
+        return song;
+    }
     public void addSong(Song song) {
         if (!songRepository.existsBySongUrl(song.getSongUrl())) {
             songRepository.save(song);

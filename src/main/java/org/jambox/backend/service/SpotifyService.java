@@ -44,7 +44,17 @@ public class SpotifyService {
                 .bodyToMono(SpotifySearchResponse.class);
     }
 
-    public Mono<TrackResponseModel> getTrackDetails(String trackUri) {
+    public Mono<TrackResponseModel> getTrackDetailsFromId(String trackId) {
+        return spotifyWebClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/tracks/"+trackId)
+                        .build())
+                .header("Authorization", "Bearer " + spotifyAuthService.getAccessToken())
+                .retrieve()
+                .bodyToMono(TrackResponseModel.class);
+    }
+
+    public Mono<TrackResponseModel> getTrackDetailsFromUri(String trackUri) {
         return spotifyWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/tracks/"+extractTrackId(trackUri))
