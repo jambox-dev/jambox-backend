@@ -9,13 +9,16 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
-//todo: einkommentieren
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -53,5 +56,27 @@ public class SecurityConfiguration {
                 ;
 
         return http.build();
+    }
+
+    // Globale CORS-Konfiguration
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        // Frontend-Ursprünge hier pflegen (Beispiele für Dev)
+        config.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://127.0.0.1:3000",
+                "http://localhost:4200",
+                "http://127.0.0.1:4200"
+        ));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        config.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
+        config.setAllowCredentials(true); // nur mit expliziten Origins, nicht mit '*'
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }
