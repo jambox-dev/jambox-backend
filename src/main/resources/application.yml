@@ -5,14 +5,14 @@ spring:
         mongodb:
             port: 27017     # Standard MongoDB Port
             database: jambox # Ihr Datenbankname
-            # Für URI-basierte Verbindung:
+            # FÃ¼r URI-basierte Verbindung:
             uri: mongodb://
             password:
             username:
             authentication-database:
 
 jambox:
-    needsApproval: false
+    #needsApproval: false
     #removeDupplicate: false
     #blacklist: false
     #whitelist: false
