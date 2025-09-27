@@ -16,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.time.Instant;
 import java.util.Base64;
 
 @Service
@@ -136,7 +135,7 @@ public class SpotifyAuthService {
             throw new IllegalStateException("No Spotify Token available");
         }
         if (token.isExpired()) {
-            getRefreshToken();
+            token = getRefreshToken();
         }
         return token.getAccessToken();
     }
