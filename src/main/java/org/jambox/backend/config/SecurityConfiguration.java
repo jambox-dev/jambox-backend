@@ -1,5 +1,8 @@
 package org.jambox.backend.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jambox.backend.exception.UnAuthorizedException;
 import org.jambox.backend.model.AuthProperties;
@@ -11,16 +14,25 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.*;
 
 @Configuration
 @EnableWebSecurity
@@ -42,8 +54,72 @@ public class SecurityConfiguration {
                 .sessionManagement(AbstractHttpConfigurer::disable)
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/oauth2/authorization/spotify")
-                        .defaultSuccessUrl("/", true)              // Erfolgreiche Anmeldung Weiterleitung
-                        .failureUrl("/login?error")                // Fehlgeschlagene Anmeldung
+                        .successHandler((request, response, authentication) -> {
+                            OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
+                            OAuth2User oauth2User = token.getPrincipal();
+
+                            response.setStatus(HttpStatus.OK.value());
+                            response.setContentType("application/json;charset=UTF-8");
+
+                            Map<String, Object> successDetails = new HashMap<>();
+                            successDetails.put("timestamp", new Date());
+                            successDetails.put("status", HttpStatus.OK.value());
+                            successDetails.put("message", "Authentifizierung erfolgreich");
+                            successDetails.put("authenticated", true);
+
+                            // Benutzerinformationen hinzufügen
+                            Map<String, Object> userData = new HashMap<>();
+                            userData.put("email", oauth2User.getAttribute("email"));
+                            userData.put("name", oauth2User.getAttribute("display_name"));
+                            userData.put("id", oauth2User.getAttribute("id"));
+
+                            // Optional: Spotify-spezifische Informationen
+                            if (oauth2User.getAttribute("images") != null) {
+                                userData.put("profileImage", oauth2User.getAttribute("images"));
+                            }
+                            if (oauth2User.getAttribute("product") != null) {
+                                userData.put("spotifyProduct", oauth2User.getAttribute("product"));
+                            }
+
+                            successDetails.put("user", userData);
+
+                            new ObjectMapper().writeValue(response.getWriter(), successDetails);
+                        })
+                        .failureHandler(new AuthenticationFailureHandler() {
+                            @Override
+                            public void onAuthenticationFailure(
+                                    HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    AuthenticationException exception
+                            ) throws IOException {
+                                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                                response.setContentType("application/json;charset=UTF-8");
+
+                                Map<String, Object> errorDetails = new HashMap<>();
+                                errorDetails.put("timestamp", new Date());
+                                errorDetails.put("status", HttpStatus.UNAUTHORIZED.value());
+                                errorDetails.put("error", "Authentifizierung fehlgeschlagen");
+                                errorDetails.put("message", exception.getMessage());
+
+                                // Zusätzliche Details je nach Exception-Typ
+                                if (exception instanceof OAuth2AuthenticationException) {
+                                    OAuth2Error oauth2Error = ((OAuth2AuthenticationException) exception).getError();
+                                    errorDetails.put("oauth2_error_code", oauth2Error.getErrorCode());
+                                    errorDetails.put("oauth2_error_description", oauth2Error.getDescription());
+                                }
+
+                                // Stack Trace nur in Entwicklungsumgebung
+                                if (Arrays.asList("dev", "local").contains(
+                                        System.getProperty("spring.profiles.active"))) {
+                                    StringWriter sw = new StringWriter();
+                                    exception.printStackTrace(new PrintWriter(sw));
+                                    errorDetails.put("trace", sw.toString());
+                                }
+
+                                ObjectMapper mapper = new ObjectMapper();
+                                response.getWriter().write(mapper.writeValueAsString(errorDetails));
+                            }
+                        })
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(this.oauth2UserService())
                         )
