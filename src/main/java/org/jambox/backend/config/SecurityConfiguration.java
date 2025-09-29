@@ -51,20 +51,17 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests( customizers -> customizers
                                 .requestMatchers(
                                         "/queue",
+                                        "/spotify/queue",
+                                        "/spotify/callback",
                                         "/completion",
                                         "/songs/search",
+                                        "/spotify/loggedin",
                                         "/login/**",
                                         "/error",
                                         "/oauth2/**",           // OAuth2-Endpunkte
                                         "/login/oauth2/**",     // OAuth2-Login-Endpunkte
                                         "/logout"
                                         ).permitAll()
-                                .requestMatchers(
-                                        "/queue/approve",
-                                        "/queue/needs-approval",
-                                        "/queue/needs-approval/search",
-                                        "/queue/search"
-                                ).authenticated()
                                 .anyRequest().authenticated()
                         )
                 .logout(logout -> logout
