@@ -10,8 +10,29 @@ spring:
             password:
             username:
             authentication-database:
+    security:
+        oauth2:
+            client:
+                registration:
+                    spotify:
+                        client-id:
+                        client-secret:
+                        authorization-grant-type: authorization_code
+                        redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/spotify"
+                        scope: user-read-email
+                        client-name: Spotify
+                provider:
+                    spotify:
+                        authorization-uri: https://accounts.spotify.com/authorize
+                        token-uri: https://accounts.spotify.com/api/token
+                        user-info-uri: https://api.spotify.com/v1/me
+                        user-name-attribute: id
 
 jambox:
+    auth:
+        authorized-emails:
+            - ""
+
     #needsApproval: false
     #removeDupplicate: false
     #blacklist: false
