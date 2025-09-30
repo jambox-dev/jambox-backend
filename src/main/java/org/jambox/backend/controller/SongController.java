@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/songs")
@@ -24,7 +25,7 @@ public class SongController {
     private final SongService songService;
 
     @GetMapping()
-    public Song[] getSongs(@RequestParam(name = "song_name") String songName) {
+    public Song[] getSongs(@RequestParam(name = "song_name") String songName, @RequestParam(name = "offset") Optional<Integer> offset) {
         if (songName.contains("https://open.spotify.com/track")){
             try {
                 String trackId = songName.substring(songName.indexOf("track/") + 6, songName.indexOf("?si"));
@@ -37,7 +38,12 @@ public class SongController {
         }
 
         ArrayList<Song> songs = new ArrayList<>();
-        Tracks tracks = spotifyService.searchTrack(songName).map(SpotifySearchResponse::getTracks).block();
+        Tracks tracks = null;
+        if (offset.isPresent()) {
+            tracks = spotifyService.searchTrack(songName, offset.get()).map(SpotifySearchResponse::getTracks).block();
+        } else {
+            tracks = spotifyService.searchTrack(songName).map(SpotifySearchResponse::getTracks).block();
+        }
 
         assert tracks != null;
         List<SpotifySearchResponseItem> items = tracks.getItems();

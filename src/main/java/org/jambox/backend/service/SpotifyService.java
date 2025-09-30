@@ -29,8 +29,11 @@ public class SpotifyService {
                 .bodyToMono(SpotifyUserResponse.class);
     }
 
-
     public Mono<SpotifySearchResponse> searchTrack(String query) {
+        return searchTrack(query, 0);
+    }
+
+    public Mono<SpotifySearchResponse> searchTrack(String query, int offset) {
         return spotifyWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/search")
@@ -38,6 +41,7 @@ public class SpotifyService {
                         .queryParam("type", "track")
                         .queryParam("market", "DE")
                         .queryParam("limit", 10)
+                        .queryParam("offset", offset)
                         .build())
                 .header("Authorization", "Bearer " + spotifyAuthService.getAccessToken())
                 .retrieve()
