@@ -110,6 +110,7 @@ public class SecurityConfiguration {
                                         "/spotify/callback",
                                         "/completion",
                                         "/songs",
+                                        "/queue",
                                         "/spotify/loggedin",
                                         "/login/**",
                                         "/error",
