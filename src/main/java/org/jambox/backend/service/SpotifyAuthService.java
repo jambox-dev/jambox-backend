@@ -23,10 +23,10 @@ import java.util.Base64;
 public class SpotifyAuthService {
     public static final String SCOPES = "user-read-private user-read-email user-modify-playback-state user-read-currently-playing user-read-playback-state";
 
-    @Value( "${jambox.spotify.client-id}")
+    @Value( "${spring.security.oauth2.client.registration.spotify.client-id}")
     private String clientId;
 
-    @Value( "${jambox.spotify.client-secret}")
+    @Value( "${spring.security.oauth2.client.registration.spotify.client-secret}")
     private String clientSecret;
 
     @Value( "${jambox.spotify.callback-url}")

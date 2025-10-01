@@ -26,7 +26,7 @@ public class SpotifyController {
     private final SpotifyService spotifyService;
     private final QueueMapper queueMapper;
 
-    @Value("${jambox.spotify.client-id}")
+    @Value("${spring.security.oauth2.client.registration.spotify.client-id}")
     private String clientId;
 
     @Value("${jambox.spotify.email-address}")

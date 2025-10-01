@@ -4,9 +4,9 @@ spring:
     data:
         mongodb:
             port: 27017     # Standard MongoDB Port
-            database: jambox # Ihr Datenbankname
+            database:  # Ihr Datenbankname
             # Für URI-basierte Verbindung:
-            uri: mongodb://
+            uri:
             password:
             username:
             authentication-database:
@@ -28,17 +28,12 @@ spring:
                         user-info-uri: https://api.spotify.com/v1/me
                         user-name-attribute: id
 
+
 jambox:
+    oauth2-login-success-redirect: "http://127.0.0.1:4200/admin/dashboard"
     auth:
         authorized-emails:
             - ""
-
-    #needsApproval: false
-    #removeDupplicate: false
-    #blacklist: false
-    #whitelist: false
     spotify:
-        client-id:
-        client-secret:
-        email-address:
-        callback-url: "http://127.0.0.1:8080/spotify/callback" #Just Change the URL not the path
+        email-address: ""
+        callback-url: "http://127.0.0.1:8080/spotify/callback"
