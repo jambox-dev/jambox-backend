@@ -11,4 +11,5 @@ public class Settings {
     private String id = "SINGLETON";
 
     private boolean needsApproval;
+    private boolean isBlacklistEnabled;
 }

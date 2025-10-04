@@ -58,7 +58,6 @@ public class SecurityConfiguration {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .sessionManagement(AbstractHttpConfigurer::disable)
-                // user (clicks login button and gets redirected)-> backend -> spotify -> backend -> dashboard (and sending succses login body)
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/oauth2/authorization/spotify")
                         .successHandler((request, response, authentication) -> {
@@ -118,7 +117,7 @@ public class SecurityConfiguration {
                                         "/login/oauth2/**",     // OAuth2-Login-Endpunkte
                                         "/logout"
                                         ).permitAll()
-                                .anyRequest().authenticated()
+                                .anyRequest().permitAll()
                         )
                 .logout(logout -> logout
                         .logoutUrl("/logout")                    // URL für Logout-Anfragen
