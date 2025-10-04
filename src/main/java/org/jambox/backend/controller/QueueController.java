@@ -8,10 +8,7 @@ import org.jambox.backend.model.entity.Settings;
 import org.jambox.backend.model.entity.Song;
 import org.jambox.backend.repository.ApprovalQueueRepository;
 import org.jambox.backend.repository.SettingsRepository;
-import org.jambox.backend.service.ApprovalQueueService;
-import org.jambox.backend.service.QueueService;
-import org.jambox.backend.service.SettingsService;
-import org.jambox.backend.service.SongService;
+import org.jambox.backend.service.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,23 +22,42 @@ public class QueueController {
     private final ApprovalQueueRepository approvalQueueRepository;
     private final SettingsService settingsService;
     private final SettingsRepository settingsRepository;
+    private final BlacklistService blacklistService;
 
     @PostMapping
-    public ResponseEntity<Song> addToQueue(@RequestBody QueueAddRequest queueAddRequest) {
+    public ResponseEntity<Object> addToQueue(@RequestBody QueueAddRequest queueAddRequest) {
+        if (queueAddRequest == null || queueAddRequest.getSongUrl() == null || queueAddRequest.getSongUrl().isBlank()) {
+            return ResponseEntity.badRequest().body("Invalid Request");
+        }
+
+        if (settingsService.getSettings().isBlacklistEnabled()){
+            if (blacklistService.isSongInBlacklist(queueAddRequest.getSongUrl())){
+                return ResponseEntity.badRequest().body("Song is in blacklist");
+            }
+        }
+
         Song song = songService.getDetailsByUrl(queueAddRequest.getSongUrl());
+
         if (settingsRepository.getSettings().isNeedsApproval()) {
             approvalQueueService.addSongToApprovalQueue(song);
         } else {
             queueService.addSongToQueue(song);
         }
+
         return ResponseEntity.status(201).build();
     }
 
     @PostMapping("/settings")
-    public void setNeedsApproval(@RequestParam(name = "needs-approval") boolean needsApproval) {
+    public void setNeedsApproval(@RequestParam(name = "needs-approval", required = false) Boolean needsApproval, @RequestParam(name = "blacklist-enabled", required = false) Boolean blacklistEnabled) {
         Settings settings = settingsService.getSettings();
-        settings.setNeedsApproval(needsApproval);
+        if (needsApproval != null) {
+            settings.setNeedsApproval(needsApproval);
+        }
+        if (blacklistEnabled != null) {
+            settings.setBlacklistEnabled(blacklistEnabled);
+        }
         settingsService.updateSettings(settings);
+
     }
 
     @GetMapping("/settings")

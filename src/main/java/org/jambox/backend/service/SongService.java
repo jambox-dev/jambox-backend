@@ -18,7 +18,7 @@ public class SongService {
         List<Song> songs = songRepository.findBySongUrl(songUrl).orElse(null);
         Song song = null;
 
-        if (songs == null) {
+        if (songs == null || songs.isEmpty()) {
             TrackResponseModel trackDetails = spotifyService.getTrackDetailsFromUri(songUrl).block();
             song = new Song();
             if (trackDetails == null || trackDetails.getName() == null) {
