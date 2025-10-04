@@ -2,6 +2,7 @@ package org.jambox.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.jambox.backend.model.entity.Blacklist;
+import org.jambox.backend.model.entity.Song;
 import org.jambox.backend.service.BlacklistService;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class BlacklistController {
     }
 
     @GetMapping
-    public List<Blacklist> getBlacklist(){
-        return blacklistService.getBlacklist();
+    public List<Song> getBlacklist(){
+        return blacklistService.getBlacklist().isEmpty() ? List.of() : blacklistService.getBlacklist();
     }
 }
