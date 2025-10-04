@@ -117,7 +117,7 @@ public class SecurityConfiguration {
                                         "/login/oauth2/**",     // OAuth2-Login-Endpunkte
                                         "/logout"
                                         ).permitAll()
-                                .anyRequest().permitAll()
+                                .anyRequest().authenticated()
                         )
                 .logout(logout -> logout
                         .logoutUrl("/logout")                    // URL für Logout-Anfragen
