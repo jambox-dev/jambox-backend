@@ -1,9 +1,12 @@
 package org.jambox.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jambox.backend.config.TenantContext;
 import org.jambox.backend.model.TrackResponseModel;
 import org.jambox.backend.model.entity.Song;
+import org.jambox.backend.model.entity.Tenant;
 import org.jambox.backend.repository.SongRepository;
+import org.jambox.backend.repository.TenantRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,13 +16,21 @@ import java.util.List;
 public class SongService {
     private final SongRepository songRepository;
     private final SpotifyService spotifyService;
+    private final TenantRepository tenantRepository;
+
+    private Tenant getCurrentTenant() {
+        String tenantId = TenantContext.getTenantId();
+        return tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new IllegalStateException("Tenant not found"));
+    }
 
     public Song getDetailsByUrl(String songUrl) {
-        List<Song> songs = songRepository.findBySongUrl(songUrl).orElse(null);
+        String tenantId = TenantContext.getTenantId();
+        List<Song> songs = songRepository.findBySongUrlAndTenantId(songUrl, tenantId).orElse(null);
         Song song = null;
 
         if (songs == null || songs.isEmpty()) {
-            TrackResponseModel trackDetails = spotifyService.getTrackDetailsFromUri(songUrl).block();
+            TrackResponseModel trackDetails = spotifyService.getTrackDetailsFromUri(songUrl, getCurrentTenant()).block();
             song = new Song();
             if (trackDetails == null || trackDetails.getName() == null) {
                 throw new IllegalArgumentException("TrackDetails not found");
@@ -29,6 +40,7 @@ public class SongService {
             song.setSongCover(trackDetails.getAlbum().getImages().getFirst().getUrl());
             String artists = toCommaSeparatedString(trackDetails.getArtists().stream().map(TrackResponseModel.ArtistInfo::getName).toList());
             song.setAuthor(artists);
+            song.setTenantId(tenantId);
             songRepository.save(song);
         } else {
             song = songs.getFirst();
@@ -38,7 +50,7 @@ public class SongService {
 
     //todo: caching
     public Song getDetailsById(String songId) {
-        TrackResponseModel trackDetails = spotifyService.getTrackDetailsFromId(songId).block();
+        TrackResponseModel trackDetails = spotifyService.getTrackDetailsFromId(songId, getCurrentTenant()).block();
         Song song = new Song();
         if (trackDetails == null || trackDetails.getName() == null) {
             throw new IllegalArgumentException("TrackDetails not found");
@@ -48,11 +60,14 @@ public class SongService {
         song.setSongCover(trackDetails.getAlbum().getImages().getFirst().getUrl());
         String artists = toCommaSeparatedString(trackDetails.getArtists().stream().map(TrackResponseModel.ArtistInfo::getName).toList());
         song.setAuthor(artists);
+        song.setTenantId(TenantContext.getTenantId());
         songRepository.save(song);
         return song;
     }
     public void addSong(Song song) {
-        if (!songRepository.existsBySongUrl(song.getSongUrl())) {
+        String tenantId = TenantContext.getTenantId();
+        if (!songRepository.existsBySongUrlAndTenantId(song.getSongUrl(), tenantId)) {
+            song.setTenantId(tenantId);
             songRepository.save(song);
         }
     }

@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface SongRepository extends MongoRepository<Song, String> {
-    Optional<List<Song>> findBySongUrl(String songUrl);
-    boolean existsBySongUrl(String songUrl);
+    List<Song> findAllByTenantId(String tenantId);
+    Optional<List<Song>> findBySongUrlAndTenantId(String songUrl, String tenantId);
+    boolean existsBySongUrlAndTenantId(String songUrl, String tenantId);
 }
