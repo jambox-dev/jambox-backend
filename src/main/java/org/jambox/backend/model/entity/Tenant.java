@@ -31,4 +31,8 @@ public class Tenant {
     private LocalDateTime createdAt;
 
     private String spotifyRefreshToken;
+
+    private String spotifyAccessToken;
+
+    private LocalDateTime spotifyTokenExpiresAt;
 }

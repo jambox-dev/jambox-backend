@@ -27,8 +27,10 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -42,11 +44,13 @@ import java.util.*;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
+    private final JwtAuthenticationFilter jwtAuthFilter;
+    private final AuthenticationProvider authenticationProvider;
     private final AuthProperties authProperties;
     @Value("${jambox.oauth2-login-success-redirect}")
     private String oauth2LoginSuccessRedirect;
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-    //todo: anständige SecConfig
+
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -54,10 +58,28 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests( customizers -> customizers
+                                .requestMatchers(
+                                        "/api/auth/**",         // Allow Auth Endpoints
+                                        "/spotify/queue",
+                                        "/spotify/callback",
+                                        "/completion",
+                                        "/songs",
+                                        "/queue",
+                                        "/spotify/loggedin",
+                                        "/login/**",
+                                        "/error",
+                                        "/oauth2/**",           // OAuth2-Endpunkte
+                                        "/login/oauth2/**",     // OAuth2-Login-Endpunkte
+                                        "/logout"
+                                        ).permitAll()
+                                .anyRequest().authenticated()
+                        )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .sessionManagement(AbstractHttpConfigurer::disable)
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/oauth2/authorization/spotify")
                         .successHandler((request, response, authentication) -> {
@@ -103,22 +125,6 @@ public class SecurityConfiguration {
                                 .userService(this.oauth2UserService())
                         )
                 )
-                .authorizeHttpRequests( customizers -> customizers
-                                .requestMatchers(
-                                        "/spotify/queue",
-                                        "/spotify/callback",
-                                        "/completion",
-                                        "/songs",
-                                        "/queue",
-                                        "/spotify/loggedin",
-                                        "/login/**",
-                                        "/error",
-                                        "/oauth2/**",           // OAuth2-Endpunkte
-                                        "/login/oauth2/**",     // OAuth2-Login-Endpunkte
-                                        "/logout"
-                                        ).permitAll()
-                                .anyRequest().authenticated()
-                        )
                 .logout(logout -> logout
                         .logoutUrl("/logout")                    // URL für Logout-Anfragen
                         .logoutSuccessUrl("/")                       // Redirect nach erfolgreichem Logout
