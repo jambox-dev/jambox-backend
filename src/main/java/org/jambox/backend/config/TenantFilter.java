@@ -28,6 +28,16 @@ public class TenantFilter extends OncePerRequestFilter {
         String tenantId = request.getHeader("X-Tenant-ID");
         String serverName = request.getServerName();
 
+        if (tenantId == null) {
+            String tenantSubdomain = request.getHeader("X-Tenant-Subdomain");
+            if (tenantSubdomain != null && !tenantSubdomain.isEmpty()) {
+                Tenant tenant = tenantRepository.findBySubdomain(tenantSubdomain).orElse(null);
+                if (tenant != null) {
+                    tenantId = tenant.getId();
+                }
+            }
+        }
+
         if (tenantId == null && serverName != null) {
             // Check for subdomain
             if (serverName.endsWith(".jambox.dev")) {
