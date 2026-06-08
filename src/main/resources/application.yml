@@ -29,6 +29,15 @@ spring:
                         user-name-attribute: id
 
 
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health
+    endpoint:
+        health:
+            show-details: never
+
 jambox:
     oauth2-login-success-redirect: "http://127.0.0.1:4200/admin/dashboard"
     auth:
