@@ -39,7 +39,7 @@ management:
             show-details: never
 
 jambox:
-    oauth2-login-success-redirect: "http://127.0.0.1:4200/admin/dashboard"
+    oauth2-login-success-redirect: "${FRONTEND_URL}/admin/dashboard"
     auth:
         authorized-emails:
             - ${SPOTIFY_EMAIL_ADDRESS}
