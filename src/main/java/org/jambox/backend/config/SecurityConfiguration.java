@@ -172,7 +172,9 @@ public class SecurityConfiguration {
                 "http://127.0.0.1:3000",
                 "http://localhost:4200",
                 "http://127.0.0.1:4200",
-                "https://jambox.wiegandt.tech"
+                "https://jambox.wiegandt.tech",
+                "https://fe.jambox.dev",
+                "https://jambox.dev"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
