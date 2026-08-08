@@ -4,21 +4,21 @@ spring:
     data:
         mongodb:
             port: 27017     # Standard MongoDB Port
-            database:  # Ihr Datenbankname
+            database:  ${DATABASE_NAME}
             # Für URI-basierte Verbindung:
-            uri:
-            password:
-            username:
-            authentication-database:
+            uri: ${DATABASE_URL}
+            password: ${DATABASE_PASSWORD}
+            username: ${DATABASE_USERNAME}
+            authentication-database: ${DATABASE_AUTHENTICATION_DATABASE}
     security:
         oauth2:
             client:
                 registration:
                     spotify:
-                        client-id:
-                        client-secret:
+                        client-id: ${SPOTIFY_CLIENT_ID}
+                        client-secret: ${SPOTIFY_CLIENT_SECRET}
                         authorization-grant-type: authorization_code
-                        redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/spotify"
+                        redirect-uri: "${HOSTNAME}/login/oauth2/code/spotify"
                         scope: user-read-email
                         client-name: Spotify
                 provider:
@@ -29,11 +29,20 @@ spring:
                         user-name-attribute: id
 
 
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health
+    endpoint:
+        health:
+            show-details: never
+
 jambox:
-    oauth2-login-success-redirect: "http://127.0.0.1:4200/admin/dashboard"
+    oauth2-login-success-redirect: "${FRONTEND_URL}/admin/dashboard"
     auth:
         authorized-emails:
-            - ""
+            - ${SPOTIFY_EMAIL_ADDRESS}
     spotify:
-        email-address: ""
-        callback-url: "http://127.0.0.1:8080/spotify/callback"
+        email-address: ${SPOTIFY_EMAIL_ADDRESS}
+        callback-url: ${SPOTIFY_CALLBACK_URL}
